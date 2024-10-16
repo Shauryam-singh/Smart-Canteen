@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Admin - Manage Items</h2>
+<ul>
+    {% for item in items %}
+    <li>
+        {{ item.name }} - 
+        <form method="POST" action="{{ url_for('update_item') }}">
+            <input type="hidden" name="item_id" value="{{ item.id }}">
+            <select name="availability">
+                <option value="1" {% if item.available %}selected{% endif %}>Available</option>
+                <option value="0" {% if not item.available %}selected{% endif %}>Unavailable</option>
+            </select>
+            <button type="submit">Update</button>
+        </form>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

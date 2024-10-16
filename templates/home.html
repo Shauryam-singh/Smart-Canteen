@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Available Items</h2>
+<ul>
+    {% for item in items %}
+    <li>{{ item.name }} - 
+        {% if item.available %}
+        <a href="{{ url_for('order', item_id=item.id) }}">Order</a>
+        {% else %}
+        Not Available
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
