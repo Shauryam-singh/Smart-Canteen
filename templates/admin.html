@@ -128,12 +128,24 @@
                     {% for item in items %}
                     <li class="list-group-item d-flex justify-content-between align-items-center text-light mb-2">
                         <span><i class="fas fa-utensils"></i> {{ item.name }}</span>
+
+                        <!-- Form to update item availability, price, and quantity -->
                         <form method="POST" action="{{ url_for('update_item') }}" class="d-flex align-items-center">
                             <input type="hidden" name="item_id" value="{{ item.id }}">
+
+                            <!-- Dropdown to update availability -->
                             <select name="availability" class="form-select form-select-sm me-2 bg-dark text-light border-warning">
                                 <option value="1" {% if item.available %}selected{% endif %}>Available</option>
                                 <option value="0" {% if not item.available %}selected{% endif %}>Unavailable</option>
                             </select>
+
+                            <!-- Input field for price -->
+                            <input type="number" name="price" value="{{ item.price }}" class="form-control form-control-sm me-2 bg-dark text-light border-warning" placeholder="Price" required>
+
+                            <!-- Input field for quantity -->
+                            <input type="number" name="quantity" value="{{ item.quantity }}" class="form-control form-control-sm me-2 bg-dark text-light border-warning" placeholder="Quantity" required>
+
+                            <!-- Submit button to update item -->
                             <button type="submit" class="btn btn-warning btn-sm"><i class="fas fa-sync-alt"></i> Update</button>
                         </form>
                     </li>

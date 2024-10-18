@@ -8,7 +8,7 @@
     <!-- Font Awesome for Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <title>Smart Canteen - Order Successful</title>
+    <title>Order - {{ item.name }}</title>
     <style>
         /* Custom CSS for Animation and Effects */
         body {
@@ -126,22 +126,33 @@
         </div>
     </nav>
 
-    <!-- Available Items Container -->
+    <!-- Order Details Container -->
     <div class="container centered-content">
         <div class="card shadow-lg bg-dark text-light animate-fade-in p-4">
             <div class="card-body text-center">
                 <h2 class="card-title text-warning mb-4 glow">ORDER SUCCESSFUL</h2>
                 <p class="lead mb-4">Thank you for your order! You have successfully ordered:</p>
                 <ul class="list-group mb-4">
+                    <!-- Displaying item name and ordered quantity -->
                     <li class="list-group-item d-flex justify-content-between align-items-center text-light mb-2">
-                        <span><i class="fas fa-utensils"></i> {{ item.name }}</span>
-                        <span class="badge bg-warning rounded-pill">{{ item.quantity }}</span>
+                        <span><i class="fas fa-utensils"></i> {{ item['name'] }}</span>
+                        <span class="badge bg-warning rounded-pill">{{ request.form['quantity'] }}</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center text-light mb-2">
-                        <span>Total Price</span>
-                        <span class="badge bg-warning rounded-pill">{{ item.price }}</span>
+                        <!-- Displaying Quantity and Total Price -->
+                        <p>Quantity: {{ request.form['quantity']}}</p>
+                        <span class="badge bg-warning rounded-pill">₹{{ item['price'] }}</span>
+                    </li>
+                    <!-- Displaying Order Time -->
+                    <li class="list-group-item d-flex justify-content-between align-items-center text-light mb-2">
+                        <p>Order Time:</p><span class="badge bg-warning rounded-pill"> {{ order_time }}</span>
+                    </li>
+                    <!-- Displaying Pickup Time -->
+                    <li class="list-group-item d-flex justify-content-between align-items-center text-light mb-2">
+                        <p>Pickup Time:</p><span class="badge bg-warning rounded-pill"> {{ pickup_time }}</span>
                     </li>
                 </ul>
+                <!-- Link to continue shopping -->
                 <a href="/home" class="btn btn-warning btn-lg mt-4"><i class="fas fa-arrow-left"></i> Continue Shopping</a>
             </div>
         </div>
