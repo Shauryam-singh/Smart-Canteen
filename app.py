@@ -27,7 +27,6 @@ def login():
     username = request.form['username']
     password = request.form['password']
     
-    # Connect to the database
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
@@ -35,11 +34,8 @@ def login():
             user = cursor.fetchone()
             if user:
                 session['user_id'] = user['id']
-                session['role'] = user['role']  # Store the role in the session
-                if user['role'] == 'admin':
-                    return redirect(url_for('admin'))
-                else:
-                    return redirect(url_for('home'))
+                session['role'] = user['role']
+                return redirect(url_for('admin') if user['role'] == 'admin' else url_for('home'))
     finally:
         conn.close()
 
@@ -50,7 +46,6 @@ def home():
     if 'user_id' not in session or session.get('role') != 'user':
         return redirect(url_for('index'))
 
-    # Connect to the database
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
@@ -66,16 +61,12 @@ def order(item_id):
     if 'user_id' not in session:
         return redirect(url_for('index'))
 
-    # Get the values from the form
     quantity = request.form['quantity']
-    pickup_time = request.form.get('pickup_time', None)  # Get the pickup time, defaults to None if not provided
-    order_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get the current time for the order
+    pickup_time = request.form.get('pickup_time', None)
+    order_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    # If no pickup_time is provided, set it to the current time
     if not pickup_time:
-        pickup_time = datetime.now().strftime('%H:%M')  # Current time in "HH:MM" format
-
-    print(f"Pickup Time: {pickup_time}, Order Time: {order_time}")  # Debugging output
+        pickup_time = datetime.now().strftime('%H:%M')
 
     conn = get_db_connection()
     try:
@@ -96,8 +87,6 @@ def order(item_id):
                     cursor.execute("UPDATE items SET quantity = %s WHERE id = %s", (new_quantity, item_id))
 
                     conn.commit()
-
-                    # Pass order_time to the template
                     return render_template('order.html', item=item, total_price=total_price, pickup_time=pickup_time, order_time=order_time)
                 else:
                     return "Not enough stock available!"
@@ -117,7 +106,6 @@ def admin():
     if 'user_id' not in session or session.get('role') != 'admin':
         return redirect(url_for('index'))
 
-    # Connect to the database
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
@@ -135,13 +123,41 @@ def update_item():
     price = request.form['price']
     quantity = request.form['quantity']
 
-    # Connect to the database
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            # Update item availability, price, and quantity
             cursor.execute("UPDATE items SET available = %s, price = %s, quantity = %s WHERE id = %s",
                            (availability == '1', price, quantity, item_id))
+            conn.commit()
+    finally:
+        conn.close()
+
+    return redirect(url_for('admin'))
+
+@app.route('/add_item', methods=['POST'])
+def add_item():
+    name = request.form['name']
+    price = request.form['price']
+    quantity = request.form['quantity']
+    availability = request.form['availability']  # Get availability value
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("INSERT INTO items (name, price, quantity, available) VALUES (%s, %s, %s, %s)", 
+                           (name, price, quantity, availability == '1'))  # Convert to boolean
+            conn.commit()
+    finally:
+        conn.close()
+
+    return redirect(url_for('admin'))
+
+@app.route('/delete_item/<int:item_id>', methods=['POST'])
+def delete_item(item_id):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("DELETE FROM items WHERE id = %s", (item_id,))
             conn.commit()
     finally:
         conn.close()

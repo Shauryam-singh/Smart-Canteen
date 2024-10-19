@@ -124,6 +124,22 @@
         <div class="card shadow-lg mt-5 bg-dark text-light animate-fade-in">
             <div class="card-body">
                 <h2 class="card-title text-center text-warning mb-4 glow">Admin - Manage Items</h2>
+
+                <!-- Add New Item Form -->
+                <form method="POST" action="{{ url_for('add_item') }}" class="mb-4">
+                    <h5 class="text-warning">Add New Item</h5>
+                    <div class="input-group mb-2">
+                        <input type="text" name="name" class="form-control" placeholder="Item Name" required>
+                        <input type="number" name="price" class="form-control" placeholder="Price" required>
+                        <input type="number" name="quantity" class="form-control" placeholder="Quantity" required>
+                        <select name="availability" class="form-select">
+                            <option value="1">Available</option>
+                            <option value="0">Unavailable</option>
+                        </select>
+                        <button type="submit" class="btn btn-warning"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                </form>
+
                 <ul class="list-group">
                     {% for item in items %}
                     <li class="list-group-item d-flex justify-content-between align-items-center text-light mb-2">
@@ -140,14 +156,20 @@
                             </select>
 
                             <!-- Input field for price -->
-                            <input type="number" name="price" value="{{ item.price }}" class="form-control form-control-sm me-2 bg-dark text-light border-warning" placeholder="Price" required>
+                            <input type="number" name="price" value="{{ item.price }}" min="0" step="0.01" class="form-control form-control-sm me-2 bg-dark text-light border-warning" placeholder="Price" required>
 
                             <!-- Input field for quantity -->
-                            <input type="number" name="quantity" value="{{ item.quantity }}" class="form-control form-control-sm me-2 bg-dark text-light border-warning" placeholder="Quantity" required>
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="0" class="form-control form-control-sm me-2 bg-dark text-light border-warning" placeholder="Quantity" required>
 
                             <!-- Submit button to update item -->
                             <button type="submit" class="btn btn-warning btn-sm"><i class="fas fa-sync-alt"></i> Update</button>
                         </form>
+
+                        <!-- Form to delete item -->
+                        <form method="POST" action="{{ url_for('delete_item', item_id=item.id) }}" class="ms-2">
+                            <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> Delete</button>
+                        </form>
+
                     </li>
                     {% endfor %}
                 </ul>
