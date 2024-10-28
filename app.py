@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import pymysql
 from datetime import datetime
+import json
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -41,16 +42,27 @@ def login():
 
     return "Invalid credentials!"
 
+def load_items_from_json():
+    with open('items.json') as f:
+        return json.load(f)
+
 @app.route('/home')
 def home():
     if 'user_id' not in session or session.get('role') != 'user':
         return redirect(url_for('index'))
+
+    # Load items from JSON
+    item_images = {item['id']: item['image_url'] for item in load_items_from_json()}
 
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             cursor.execute("SELECT * FROM items")
             items = cursor.fetchall()
+            # Map image URLs to items
+            for item in items:
+                item['image_url'] = item_images.get(item['id'], None)  # Add image URL to item
+
     finally:
         conn.close()
 
@@ -163,6 +175,19 @@ def delete_item(item_id):
         conn.close()
 
     return redirect(url_for('admin'))
+
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+@app.route('/submit_contact', methods=['POST'])
+def send_contact():
+    name = request.form['name']
+    email = request.form['email']
+    message = request.form['message']
+    # Add logic here to save the message or send it via email
+
+    return "Thank you for reaching out! We will get back to you shortly."
 
 if __name__ == '__main__':
     app.run(debug=True)
