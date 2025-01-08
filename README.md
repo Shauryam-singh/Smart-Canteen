@@ -100,6 +100,7 @@ CREATE TABLE orders (
     total_price DECIMAL(10, 2) NOT NULL,
     pickup_time TIME NOT NULL,
     order_time DATETIME NOT NULL,
+    order_id VARCHAR(36) NOT NULL UNIQUE,   -- Updated order_id column
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (item_id) REFERENCES items(id)
 );
