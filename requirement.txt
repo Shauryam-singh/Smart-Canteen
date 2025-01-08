@@ -1,3 +1,5 @@
 Flask
 mysql-connector-python
 pymysql
+Flask-Mail
+gunicorn

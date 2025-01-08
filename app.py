@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import pymysql
 from datetime import datetime
 import json
+import uuid
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -15,6 +16,10 @@ def get_db_connection():
         database='smart_canteen',
         cursorclass=pymysql.cursors.DictCursor
     )
+
+def load_items_from_json():
+    with open('items.json') as f:
+        return json.load(f)
 
 @app.route('/')
 def index():
@@ -41,10 +46,6 @@ def login():
         conn.close()
 
     return "Invalid credentials!"
-
-def load_items_from_json():
-    with open('items.json') as f:
-        return json.load(f)
 
 @app.route('/home')
 def home():
@@ -76,6 +77,7 @@ def order(item_id):
     quantity = request.form['quantity']
     pickup_time = request.form.get('pickup_time', None)
     order_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    order_id = str(uuid.uuid4())  # Generate unique order ID
 
     if not pickup_time:
         pickup_time = datetime.now().strftime('%H:%M')
@@ -91,15 +93,15 @@ def order(item_id):
                     total_price = float(item['price']) * int(quantity)
 
                     cursor.execute(""" 
-                        INSERT INTO orders (user_id, item_id, quantity, total_price, pickup_time, order_time) 
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                        """, (session['user_id'], item_id, quantity, total_price, pickup_time, order_time))
+                        INSERT INTO orders (order_id, user_id, item_id, quantity, total_price, pickup_time, order_time) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        """, (order_id, session['user_id'], item_id, quantity, total_price, pickup_time, order_time))
 
                     new_quantity = item['quantity'] - int(quantity)
                     cursor.execute("UPDATE items SET quantity = %s WHERE id = %s", (new_quantity, item_id))
 
                     conn.commit()
-                    return render_template('order.html', item=item, total_price=total_price, pickup_time=pickup_time, order_time=order_time)
+                    return render_template('order.html', item=item, total_price=total_price, pickup_time=pickup_time, order_time=order_time, order_id=order_id)
                 else:
                     return "Not enough stock available!"
     finally:
@@ -118,11 +120,17 @@ def admin():
     if 'user_id' not in session or session.get('role') != 'admin':
         return redirect(url_for('index'))
 
+    # Load items from JSON
+    item_images = {item['id']: item['image_url'] for item in load_items_from_json()}
+
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             cursor.execute("SELECT * FROM items")
             items = cursor.fetchall()
+            # Map image URLs to items
+            for item in items:
+                item['image_url'] = item_images.get(item['id'], None)  # Add image URL to item
     finally:
         conn.close()
 

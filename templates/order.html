@@ -26,6 +26,14 @@
             color: #f39c12 !important;
         }
 
+        .navbar-toggler {
+            border-color: #f39c12;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+        }
+
         .card {
             border-radius: 20px;
             box-shadow: 0px 0px 25px rgba(243, 156, 18, 0.5);
@@ -95,6 +103,26 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 20px;
+            }
+
+            .card-title {
+                font-size: 1.5rem;
+            }
+
+            .list-group-item {
+                font-size: 0.9rem;
+            }
+
+            .btn-warning {
+                font-size: 1rem;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
@@ -127,7 +155,7 @@
     </nav>
 
     <!-- Order Details Container -->
-    <div class="container centered-content">
+    <div class="my-4 container centered-content">
         <div class="card shadow-lg bg-dark text-light animate-fade-in p-4">
             <div class="card-body text-center">
                 <h2 class="card-title text-warning mb-4 glow">ORDER SUCCESSFUL</h2>
@@ -146,6 +174,10 @@
                     <!-- Displaying Order Time -->
                     <li class="list-group-item d-flex justify-content-between align-items-center text-light mb-2">
                         <p>Order Time:</p><span class="badge bg-warning rounded-pill"> {{ order_time }}</span>
+                    </li>
+                    <!-- Displaying Order Id -->
+                    <li class="list-group-item d-flex justify-content-between align-items-center text-light mb-2">
+                        <p>Order ID: </p><span class="badge bg-warning rounded-pill">{{ order_id }}</span>
                     </li>
                     <!-- Displaying Pickup Time -->
                     <li class="list-group-item d-flex justify-content-between align-items-center text-light mb-2">

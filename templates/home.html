@@ -25,6 +25,14 @@
             letter-spacing: 1px;
             color: #f39c12 !important;
         }
+        
+        .navbar-toggler {
+            border-color: #f39c12;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+        }
 
         .card {
             border-radius: 20px;
@@ -37,78 +45,34 @@
             box-shadow: 0px 0px 40px rgba(243, 156, 18, 0.8);
         }
 
-        .card-title {
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .btn-warning {
-            box-shadow: 0px 0px 15px rgba(243, 156, 18, 0.5);
-        }
-
-        .btn-warning:hover {
-            box-shadow: 0px 0px 20px rgba(243, 156, 18, 0.8);
-        }
-
         .list-group-item {
             background-color: #1c1c1c;
             border-color: #333;
             border-radius: 12px;
-            transition: background-color 0.3s ease;
         }
 
         .list-group-item:hover {
             background-color: #333;
         }
 
-        .glow {
-            text-shadow: 0px 0px 8px rgba(243, 156, 18, 0.8);
-        }
-
-        .item-name-image{
+        .item-name-image {
             display: flex;
             gap: 20px;
         }
 
-        /* Image styles */
-        img{
-            width: 80px; /* Set the size of the image */
-            height: auto; /* Maintain aspect ratio */
-            border-radius: 10px; /* Rounded corners */
-            transition: transform 0.3s ease; /* Smooth scale effect */
+        img {
+            width: 80px;
+            height: auto;
+            border-radius: 10px;
         }
 
-        .item-image:hover {
-            transform: scale(1.1); /* Scale effect on hover */
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background-color: #f39c12;
-            border-radius: 8px;
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 1.5s ease;
-        }
-
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-            }
-
-            100% {
-                opacity: 1;
-            }
+        .glow {
+            text-shadow: 0px 0px 8px rgba(243, 156, 18, 0.8);
         }
     </style>
 </head>
 
-<body class="bg-dark animate-fade-in">
+<body class="bg-dark">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
@@ -119,18 +83,10 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link text-warning" href="/home"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-warning" href="/contact"><i class="fa-solid fa-phone"></i> Contact Us</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-warning" href="#"><i class="fas fa-shopping-cart"></i> Orders</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-warning" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link text-warning" href="/home"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link text-warning" href="/contact"><i class="fa-solid fa-phone"></i> Contact Us</a></li>
+                    <li class="nav-item"><a class="nav-link text-warning" href="#"><i class="fas fa-shopping-cart"></i> Orders</a></li>
+                    <li class="nav-item"><a class="nav-link text-warning" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 </ul>
             </div>
         </div>
@@ -138,56 +94,33 @@
 
     <!-- Available Items Container -->
     <div class="container mt-5 pt-5">
-        <div class="card shadow-lg mt-5 bg-dark text-light animate-fade-in">
+        <div class="card shadow-lg mt-5 bg-dark text-light">
             <div class="card-body">
                 <h2 class="card-title text-center text-warning mb-4 glow">Available Items</h2>
                 <ul class="list-group">
                     {% for item in items %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center text-light mb-2">
-                        <span class="item-name-image d-flex align-items-center">
-                            <img src="{{ item.image_url }}" alt="{{ item.name }}">
-                            <i class="fas fa-utensils"></i> {{ item.name }}
-                        </span>
-                        <p>Price: ₹{{ item.price }} | Available: {{ item.quantity }}</p>
-
-                        {% if item.quantity > 0 %}
-                        <form action="{{ url_for('order', item_id=item.id) }}" method="POST" class="d-flex">
-                            <input type="number" name="quantity" class="form-control me-2" min="1" max="{{ item.quantity }}" value="1" required>
-                            
-                            <!-- Pickup time input, optional -->
-                            <input type="time" id="pickup_time_{{ item.id }}" name="pickup_time" class="form-control me-2" placeholder="Pick-up Time (optional)">
-                            
-                            <button type="submit" class="btn btn-warning btn-sm">Order</button>
-                        </form>                        
-                        
-                        <script>
-                            document.querySelectorAll('[name="quantity"]').forEach(function (element) {
-                                element.addEventListener('change', function () {
-                                    var pickupTimeInput = this.closest('form').querySelector('[name="pickup_time"]');
-                                    if (!pickupTimeInput.value) {
-                                        var now = new Date();
-                                        var hours = now.getHours().toString().padStart(2, '0');
-                                        var minutes = now.getMinutes().toString().padStart(2, '0');
-                                        pickupTimeInput.value = hours + ':' + minutes;
-                                    }
-                                });
-                            });
-                        
-                            // Automatically set pickup time when the form is submitted, if empty
-                            document.querySelector('form').addEventListener('submit', function(event) {
-                                var pickupTimeInput = this.querySelector('[name="pickup_time"]');
-                                if (!pickupTimeInput.value) {
-                                    var now = new Date();
-                                    var hours = now.getHours().toString().padStart(2, '0');
-                                    var minutes = now.getMinutes().toString().padStart(2, '0');
-                                    pickupTimeInput.value = hours + ':' + minutes;
-                                }
-                            });
-                        </script>
-                        
-                        {% else %}
-                        <span class="text-muted">Not Available</span>
-                        {% endif %}
+                    <li class="list-group-item mb-2">
+                        <div class="row align-items-center">
+                            <div class="col-3 col-sm-2">
+                                <img src="{{ item.image_url }}" alt="{{ item.name }}" class="img-fluid">
+                            </div>
+                            <div class="col-6 col-sm-5 text-light">
+                                <strong>{{ item.name }}</strong><br>
+                                <small>Price: ₹{{ item.price }}</small><br>
+                                <small>Available: {{ item.quantity }}</small>
+                            </div>
+                            <div class="col-12 col-sm-5 mt-2 mt-sm-0">
+                                {% if item.quantity > 0 %}
+                                <form action="{{ url_for('order', item_id=item.id) }}" method="POST" class="d-flex flex-wrap">
+                                    <input type="number" name="quantity" class="form-control me-2 mb-2" min="1" max="{{ item.quantity }}" value="1" required>
+                                    <input type="time" name="pickup_time" class="form-control me-2 mb-2" placeholder="Pick-up Time">
+                                    <button type="submit" class="btn btn-warning btn-sm">Order</button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted">Not Available</span>
+                                {% endif %}
+                            </div>
+                        </div>
                     </li>
                     {% endfor %}
                 </ul>
