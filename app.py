@@ -70,6 +70,7 @@ def home():
     return render_template('home.html', items=items)
 
 @app.route('/order/<int:item_id>', methods=['POST'])
+@app.route('/order/<int:item_id>', methods=['POST'])
 def order(item_id):
     if 'user_id' not in session:
         return redirect(url_for('index'))
@@ -101,13 +102,16 @@ def order(item_id):
                     cursor.execute("UPDATE items SET quantity = %s WHERE id = %s", (new_quantity, item_id))
 
                     conn.commit()
+                    print(f"Order placed successfully: {order_id}, Item: {item['name']}, Quantity: {quantity}, Total: {total_price}")
                     return render_template('order.html', item=item, total_price=total_price, pickup_time=pickup_time, order_time=order_time, order_id=order_id)
                 else:
+                    print(f"Not enough stock for item: {item['name']}, Available: {item['quantity']}, Requested: {quantity}")
                     return "Not enough stock available!"
     finally:
         conn.close()
 
     return redirect(url_for('home'))
+
 
 @app.route('/logout')
 def logout():
@@ -196,6 +200,26 @@ def send_contact():
     # Add logic here to save the message or send it via email
 
     return "Thank you for reaching out! We will get back to you shortly."
+
+@app.route('/orders')
+def orders():
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT o.order_id, o.quantity, o.total_price, o.pickup_time, o.order_time, i.name 
+                FROM orders o
+                JOIN items i ON o.item_id = i.id
+                WHERE o.user_id = %s
+            """, (session['user_id'],))
+            orders = cursor.fetchall()
+    finally:
+        conn.close()
+
+    return render_template('orders.html', orders=orders)
 
 if __name__ == '__main__':
     app.run(debug=True)

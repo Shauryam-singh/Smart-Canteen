@@ -8,7 +8,7 @@
     <!-- Font Awesome for Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <title>Smart Canteen - Available Items</title>
+    <title>Smart Canteen - My Orders</title>
     <style>
         /* Custom CSS for Animation and Effects */
         body {
@@ -25,7 +25,7 @@
             letter-spacing: 1px;
             color: #f39c12 !important;
         }
-        
+
         .navbar-toggler {
             border-color: #f39c12;
         }
@@ -55,19 +55,16 @@
             background-color: #333;
         }
 
-        .item-name-image {
-            display: flex;
-            gap: 20px;
-        }
-
-        img {
-            width: 80px;
-            height: auto;
-            border-radius: 10px;
-        }
-
         .glow {
             text-shadow: 0px 0px 8px rgba(243, 156, 18, 0.8);
+        }
+
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        .text-warning {
+            color: #f39c12 !important;
         }
     </style>
 </head>
@@ -92,38 +89,38 @@
         </div>
     </nav>
 
-    <!-- Available Items Container -->
+    <!-- Orders Container -->
     <div class="container mt-5 pt-5">
         <div class="card shadow-lg mt-5 bg-dark text-light">
             <div class="card-body">
-                <h2 class="card-title text-center text-warning mb-4 glow">Available Items</h2>
-                <ul class="list-group">
-                    {% for item in items %}
-                    <li class="list-group-item mb-2">
-                        <div class="row align-items-center">
-                            <div class="col-3 col-sm-2">
-                                <img src="{{ item.image_url }}" alt="{{ item.name }}" class="img-fluid">
+                <h2 class="card-title text-center text-warning mb-4 glow">My Orders</h2>
+                {% if orders %}
+                    <ul class="list-group">
+                        {% for order in orders %}
+                        <li class="list-group-item mb-2">
+                            <div class="row align-items-center  text-light">
+                                <div class="col-12 col-sm-3">
+                                    <strong>Order ID:</strong> {{ order.order_id }}
+                                </div>
+                                <div class="col-12 col-sm-3">
+                                    <strong>Item:</strong> {{ order.name }}
+                                </div>
+                                <div class="col-12 col-sm-2">
+                                    <strong>Quantity:</strong> {{ order.quantity }}
+                                </div>
+                                <div class="col-12 col-sm-2">
+                                    <strong>Total:</strong> ₹{{ order.total_price }}
+                                </div>
+                                <div class="col-12 col-sm-2">
+                                    <strong>Pickup Time:</strong> {{ order.pickup_time }}
+                                </div>
                             </div>
-                            <div class="col-6 col-sm-5 text-light">
-                                <strong>{{ item.name }}</strong><br>
-                                <small>Price: ₹{{ item.price }}</small><br>
-                                <small>Available: {{ item.quantity }}</small>
-                            </div>
-                            <div class="col-12 col-sm-5 mt-2 mt-sm-0">
-                                {% if item.quantity > 0 %}
-                                <form action="{{ url_for('order', item_id=item.id) }}" method="POST" class="d-flex flex-wrap">
-                                    <input type="number" name="quantity" class="form-control me-2 mb-2" min="1" max="{{ item.quantity }}" value="1" required>
-                                    <input type="time" name="pickup_time" class="form-control me-2 mb-2" placeholder="Pick-up Time">
-                                    <button type="submit" class="btn btn-warning btn-sm">Order</button>
-                                </form>
-                                {% else %}
-                                <span class="text-muted">Not Available</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted text-center">You have not placed any orders yet.</p>
+                {% endif %}
             </div>
         </div>
     </div>
