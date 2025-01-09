@@ -104,6 +104,19 @@ CREATE TABLE orders (
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (item_id) REFERENCES items(id)
 );
+
+CREATE TABLE order_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id VARCHAR(36) NOT NULL,
+    user_id INT,
+    item_name VARCHAR(100),
+    quantity INT NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL,
+    pickup_time TIME NOT NULL,
+    order_time DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 ```
 
 ### Step 4: Configuration

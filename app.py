@@ -70,7 +70,6 @@ def home():
     return render_template('home.html', items=items)
 
 @app.route('/order/<int:item_id>', methods=['POST'])
-@app.route('/order/<int:item_id>', methods=['POST'])
 def order(item_id):
     if 'user_id' not in session:
         return redirect(url_for('index'))
@@ -93,25 +92,30 @@ def order(item_id):
                 if int(quantity) <= item['quantity']:
                     total_price = float(item['price']) * int(quantity)
 
+                    # Insert into orders table
                     cursor.execute(""" 
                         INSERT INTO orders (order_id, user_id, item_id, quantity, total_price, pickup_time, order_time) 
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
                         """, (order_id, session['user_id'], item_id, quantity, total_price, pickup_time, order_time))
 
+                    # Insert into order_history table
+                    cursor.execute(""" 
+                        INSERT INTO order_history (order_id, user_id, item_name, quantity, total_price, pickup_time, order_time)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        """, (order_id, session['user_id'], item['name'], quantity, total_price, pickup_time, order_time))
+
+                    # Update item quantity
                     new_quantity = item['quantity'] - int(quantity)
                     cursor.execute("UPDATE items SET quantity = %s WHERE id = %s", (new_quantity, item_id))
 
                     conn.commit()
-                    print(f"Order placed successfully: {order_id}, Item: {item['name']}, Quantity: {quantity}, Total: {total_price}")
                     return render_template('order.html', item=item, total_price=total_price, pickup_time=pickup_time, order_time=order_time, order_id=order_id)
                 else:
-                    print(f"Not enough stock for item: {item['name']}, Available: {item['quantity']}, Requested: {quantity}")
                     return "Not enough stock available!"
     finally:
         conn.close()
 
     return redirect(url_for('home'))
-
 
 @app.route('/logout')
 def logout():
@@ -210,10 +214,9 @@ def orders():
     try:
         with conn.cursor() as cursor:
             cursor.execute("""
-                SELECT o.order_id, o.quantity, o.total_price, o.pickup_time, o.order_time, i.name 
-                FROM orders o
-                JOIN items i ON o.item_id = i.id
-                WHERE o.user_id = %s
+                SELECT order_id, item_name, quantity, total_price, pickup_time, order_time
+                FROM order_history
+                WHERE user_id = %s
             """, (session['user_id'],))
             orders = cursor.fetchall()
     finally:
