@@ -74,7 +74,7 @@ def order(item_id):
     if 'user_id' not in session:
         return redirect(url_for('index'))
 
-    quantity = request.form['quantity']
+    quantity = int(request.form['quantity'])
     pickup_time = request.form.get('pickup_time', None)
     order_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     order_id = str(uuid.uuid4())  # Generate unique order ID
@@ -85,12 +85,14 @@ def order(item_id):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
+            # Fetch the item from the database
             cursor.execute("SELECT * FROM items WHERE id = %s", (item_id,))
             item = cursor.fetchone()
 
             if item:
-                if int(quantity) <= item['quantity']:
-                    total_price = float(item['price']) * int(quantity)
+                # Check if the requested quantity is available
+                if quantity <= item['quantity']:
+                    total_price = float(item['price']) * quantity
 
                     # Insert into orders table
                     cursor.execute(""" 
@@ -105,11 +107,27 @@ def order(item_id):
                         """, (order_id, session['user_id'], item['name'], quantity, total_price, pickup_time, order_time))
 
                     # Update item quantity
-                    new_quantity = item['quantity'] - int(quantity)
+                    new_quantity = item['quantity'] - quantity
                     cursor.execute("UPDATE items SET quantity = %s WHERE id = %s", (new_quantity, item_id))
 
+                    # Fetch the total quantity of all items ordered by the user
+                    cursor.execute("""
+                        SELECT SUM(quantity) AS total_quantity FROM orders WHERE user_id = %s
+                        """, (session['user_id'],))
+                    total_quantity = cursor.fetchone()['total_quantity']
+
                     conn.commit()
-                    return render_template('order.html', item=item, total_price=total_price, pickup_time=pickup_time, order_time=order_time, order_id=order_id)
+
+                    # Render the template with all the updated values
+                    return render_template(
+                        'order.html',
+                        item=item,
+                        total_price=total_price,
+                        pickup_time=pickup_time,
+                        order_time=order_time,
+                        order_id=order_id,
+                        total_quantity=total_quantity
+                    )
                 else:
                     return "Not enough stock available!"
     finally:
@@ -205,24 +223,44 @@ def send_contact():
 
     return "Thank you for reaching out! We will get back to you shortly."
 
-@app.route('/orders')
+@app.route('/orders', methods=['GET'])
 def orders():
     if 'user_id' not in session:
         return redirect(url_for('index'))
 
+    # Get filter and search query parameters
+    filter_by = request.args.get('filter_by', 'order_id')  # Default filter: order_id
+    search_query = request.args.get('search_query', '').strip()
+
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            cursor.execute("""
+            # Base SQL query
+            sql_query = """
                 SELECT order_id, item_name, quantity, total_price, pickup_time, order_time
                 FROM order_history
                 WHERE user_id = %s
-            """, (session['user_id'],))
+            """
+            params = [session['user_id']]
+
+            # Add filter conditions dynamically
+            if filter_by == "order_id" and search_query:
+                sql_query += " AND order_id LIKE %s"
+                params.append(f"%{search_query}%")
+            elif filter_by == "date" and search_query:
+                sql_query += " AND DATE(order_time) = %s"
+                params.append(search_query)
+            elif filter_by == "item_name" and search_query:
+                sql_query += " AND item_name LIKE %s"
+                params.append(f"%{search_query}%")
+
+            # Execute the query
+            cursor.execute(sql_query, params)
             orders = cursor.fetchall()
     finally:
         conn.close()
 
-    return render_template('orders.html', orders=orders)
+    return render_template('orders.html', orders=orders, filter_by=filter_by, search_query=search_query)
 
 if __name__ == '__main__':
     app.run(debug=True)
