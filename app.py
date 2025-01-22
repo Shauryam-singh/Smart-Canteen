@@ -266,8 +266,16 @@ def orders():
 def user():
     if 'user_id' not in session:
         return redirect(url_for('index'))
-    
-    return render_template('user.html')
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM users")
+            user = cursor.fetchall()
+    finally:
+        conn.close()
+
+    return render_template('user.html', user=user)
 
 if __name__ == '__main__':
     app.run(debug=True)

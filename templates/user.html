@@ -109,20 +109,20 @@
                 <h2 class="text-center text-warning glow mb-4"><i class="fa-solid fa-user"></i> User Profile</h2>
                 <div class="row">
                     <div class="col-md-4 text-center">
-                        <img src="https://via.placeholder.com/150" alt="User Avatar" class="rounded-circle img-fluid mb-3">
-                        <h4 class="text-warning">${user.name}</h4>
-                        <p class="text-light">${user.email}</p>
+                        <h1 style="font-size: 5rem;"><i class="fa-solid fa-user"></i></h1>
+                        <h4 class="text-warning">{{ user.username }}</h4>
+                        <p class="text-light">{{user.email }}</p>
                     </div>
                     <div class="col-md-8">
                         <h5 class="text-warning"><i class="fa-solid fa-info-circle"></i> Personal Information</h5>
                         <ul class="list-group list-group-flush">
-                            <li class="list-group-item text-light">Name: ${user.name}</li>
-                            <li class="list-group-item text-light">Email: ${user.email}</li>
-                            <li class="list-group-item text-light">Phone: ${user.phone}</li>
-                            <li class="list-group-item text-light">Member Since: ${user.login_time}</li>
+                            <li class="list-group-item text-light">Name: {{ user.name }}</li>
+                            <li class="list-group-item text-light">Email: {{ user.email }}</li>
+                            <li class="list-group-item text-light">Phone: {{user.phone }}</li>
+                            <li class="list-group-item text-light">Member Since: {{ user.login_time }}</li>
                         </ul>
                         <h5 class="text-warning mt-4"><i class="fa-solid fa-cogs"></i> Settings</h5>
-                        <button class="btn btn-warning w-100 mt-3"><i class="fa-solid fa-edit"></i> Edit Profile</button>
+                        <a href="/edit_user"><button class="btn btn-warning w-100 mt-3"><i class="fa-solid fa-edit"></i> Edit Profile</button></a>
                         <a href="/logout"><button class="btn btn-danger w-100 mt-2"><i class="fa-solid fa-sign-out-alt"></i> Logout</button></a>
                     </div>
                 </div>
