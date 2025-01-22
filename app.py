@@ -262,5 +262,12 @@ def orders():
 
     return render_template('orders.html', orders=orders, filter_by=filter_by, search_query=search_query)
 
+@app.route('/user')
+def user():
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+    
+    return render_template('user.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
