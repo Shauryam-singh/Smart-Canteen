@@ -270,12 +270,49 @@ def user():
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM users")
-            user = cursor.fetchall()
+            cursor.execute("SELECT * FROM users WHERE id = %s", (session['user_id'],))
+            user = cursor.fetchone()
+            if not user:
+                return "User not found!", 404
     finally:
         conn.close()
 
     return render_template('user.html', user=user)
+
+@app.route('/edit_user', methods=['GET', 'POST'])
+def edit_user():
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            if request.method == 'GET':
+                # Fetch user data to prefill the form
+                cursor.execute("SELECT * FROM users WHERE id = %s", (session['user_id'],))
+                user = cursor.fetchone()
+                if not user:
+                    return "User not found!", 404
+                return render_template('edit_user.html', user=user)
+
+            if request.method == 'POST':
+                # Handle the form submission (edit user)
+                username = request.form['username']
+                email = request.form['email']
+                phone = request.form['phone']
+                # Validation
+                if not username or not email or not phone:
+                    return "All fields are required!", 400
+
+                # Update user details
+                cursor.execute("""
+                    UPDATE users SET username = %s, email = %s, phone = %s WHERE id = %s
+                """, (username, email, phone, session['user_id']))
+                conn.commit()
+                return redirect(url_for('user'))
+
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     app.run(debug=True)
