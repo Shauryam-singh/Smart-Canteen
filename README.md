@@ -84,14 +84,17 @@ CREATE TABLE users (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     phone VARCHAR(15),
+    role ENUM('admin', 'user') DEFAULT 'user',
     login_time DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
 -- Table for items
 CREATE TABLE items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
-    quantity INT NOT NULL
+    quantity INT NOT NULL,
+    available BOOLEAN DEFAULT TRUE
 );
 
 -- Table for orders
